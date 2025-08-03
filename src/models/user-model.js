@@ -59,7 +59,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
 //In sign method of jwt, we pass the payload and then secret key and expiresIn in object
 //The payload can be any data, here we are passing user id and email
 userSchema.methods.generateAccessToken = function(){
-    return jwt.sign({id: this._id, email : this.email}, process.env.ACCESS_TOKEN_SECRET, {
+    return jwt.sign({_id: this._id, email : this.email}, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY
     });
 }
@@ -72,4 +72,6 @@ userSchema.methods.generateRefreshToken = function(){
     });
 }
 
-export default mongoose.model("User", userSchema);
+const User =  mongoose.model("User", userSchema);
+
+export {User}
