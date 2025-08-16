@@ -118,7 +118,7 @@ const loginUser = asyncHandler(async (req,res)=>{
         throw new apiError(404,"Something went wrong")
     }
 
-    const isPasswordValid = logUser.isPasswordCorrect(password)
+    const isPasswordValid = await logUser.isPasswordCorrect(password)
 
     if(!isPasswordValid){
         throw new apiError(401,"Invalid user credential")
@@ -190,7 +190,7 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
         throw new apiError(401,"Invalid Refresh Token")
     }
 
-    if(incomingRefreshToken !== user.refrehToken){
+    if(incomingRefreshToken !== user.refreshToken){
         throw new apiError(401,"Refresh token is expires or used")
     }
 
@@ -204,8 +204,8 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
 
     return res
     .status(400)
-    .cookies("accessToken",accessToken, options)
-    .cookies("refreshToken",newRefreshToken, options)
+    .cookie("accessToken",accessToken, options)
+    .cookie("refreshToken",newRefreshToken, options)
     .json(
         new ApiResponse(
             200,
@@ -222,11 +222,12 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
 
 //change current password
 const changeCurrentPassword = asyncHandler(async (req,res)=>{
+    // console.log(req.body)
     const {oldPassword, newPassword} = req.body;
 
     const user = await User.findById(req.user._id)
 
-    const isPasswordCorrect = user.isPasswordCorrect(oldPassword)
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
     if(!isPasswordCorrect){
         throw new apiError(400,"Invalid old password")
@@ -262,7 +263,7 @@ const updateAccountDetails = asyncHandler(async (req,res)=>{
         throw new apiError(401, "Email or fullName is required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set : {
@@ -282,7 +283,7 @@ const updateAccountDetails = asyncHandler(async (req,res)=>{
 
 //update user avatar
 const updateUserAvatar = asyncHandler(async (req,res)=>{
-    const avatarLocalPath =req.file.path
+    const avatarLocalPath = req.file.path
 
     if(!avatarLocalPath){
         throw new apiError(400,"Avatar file is missing")
